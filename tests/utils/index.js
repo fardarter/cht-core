@@ -134,10 +134,12 @@ const request = (options, { debug } = {}) => { //NOSONAR
   options.uri = options.uri || `${constants.BASE_URL}${options.path}`;
   options.json = options.json === undefined ? true : options.json;
 
-  if (debug) {
-    console.log('SENDING REQUEST');
-    console.log(JSON.stringify(options, null, 2));
-  }
+  console.log({debug, loglevel: process.env.LOGLEVEL});
+  
+  console.log('DEBUGGING');
+  console.log('SENDING REQUEST');
+  console.log(JSON.stringify(options, null, 2));
+
 
   options.transform = (body, response, resolveWithFullResponse) => {
     if (debug) {
@@ -155,8 +157,13 @@ const request = (options, { debug } = {}) => { //NOSONAR
   };
 
   return rpn(options).catch(err => {
-    err.responseBody = err?.response?.body;
+
+    console.log('DEBUGGING');
+    const { name = null, statusCode = null, message = null, options = null, response = null } = err;
+    console.error('Response Error', { name, statusCode, message, options, response });
+    err.responseBody = err.response && err.response.body;
     console.warn(`Error with request: ${options.method || 'GET'} ${options.uri}`);
+
     throw err;
   });
 };
